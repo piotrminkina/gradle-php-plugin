@@ -1,0 +1,5 @@
+// see https://docs.gradle.org/current/dsl/org.gradle.api.tasks.wrapper.Wrapper.html
+task wrapper(type: Wrapper) {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = '4.1'
+}
