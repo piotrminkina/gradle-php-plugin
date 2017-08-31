@@ -1,3 +1,57 @@
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+    id 'idea'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    integrationTest {
+        groovy {
+            srcDir file('src/integrationTest/groovy')
+        }
+        resources {
+            srcDir file('src/integrationTest/resources')
+        }
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+dependencies {
+    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4', {
+        exclude group: 'org.codehaus.groovy', module: 'groovy-all'
+    }
+}
+
+gradlePlugin {
+    testSourceSets sourceSets.integrationTest
+
+    plugins {
+        phpLangPlugin {
+            id = 'pl.cloudad.php-lang'
+            implementationClass = 'pl.cloudad.gradle.language.php.plugins.PhpLanguagePlugin'
+        }
+    }
+}
+
+tasks.test {
+    maxParallelForks = Runtime.runtime.availableProcessors()
+}
+
+task integrationTest(type: Test) {
+    group LifecycleBasePlugin.VERIFICATION_GROUP
+
+    maxParallelForks = Runtime.runtime.availableProcessors()
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+check.dependsOn integrationTest
+
 // see https://docs.gradle.org/current/dsl/org.gradle.api.tasks.wrapper.Wrapper.html
 task wrapper(type: Wrapper) {
     distributionType = Wrapper.DistributionType.ALL
